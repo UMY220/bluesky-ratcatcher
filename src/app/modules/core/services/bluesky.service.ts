@@ -45,6 +45,26 @@ export class BlueskyService {
     return result;
    }
 
+   async getFollows(did: string): Promise<ProfileView[]> {
+
+    let result : ProfileView[] = [];
+    let cursor : string | undefined;
+
+    do {
+      const params = {
+        actor: did,
+        cursor
+      };
+      const response = await this.agent.getFollows(params);
+      const follows : ProfileView[] = response.data?.follows || [];
+      result = result.concat(follows);
+      cursor = response.data.cursor;
+
+    } while (cursor);
+
+    return result;
+   }
+
    async getFollowers(did: string) : Promise<ProfileView[]> {
 
     let result : ProfileView[] = [];

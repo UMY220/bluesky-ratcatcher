@@ -3,11 +3,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import {MatTableModule} from '@angular/material/table';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTableModule } from '@angular/material/table';
+import { ProfileView } from '@atproto/api/dist/client/types/app/bsky/actor/defs';
 
 import { BlueskyService } from '../../core/services/bluesky.service';
-import { Follower, FOLLOWER_TRANSFORMER } from '../../core/interfaces/follower.interface';
-import { ProfileView } from '@atproto/api/dist/client/types/app/bsky/actor/defs';
 
 @Component({
   selector: 'bl-review-tab',
@@ -17,6 +17,7 @@ import { ProfileView } from '@atproto/api/dist/client/types/app/bsky/actor/defs'
     MatButtonModule,
     MatFormFieldModule, 
     MatInputModule,
+    MatRadioModule,
     MatTableModule
   ],
   templateUrl: './review-tab.component.html',
@@ -32,7 +33,9 @@ export class ReviewTabComponent {
 
   actor: string = "Unknown";
 
+  follows: ProfileView[] = [];
   followers: ProfileView[] = [];
+
   displayedColumns: string[] = ['did', 'handle', 'displayName'];
 
   constructor(private blueskyService: BlueskyService, private formBuilder: FormBuilder) {
@@ -68,8 +71,27 @@ export class ReviewTabComponent {
     }
   }
 
+  async getFollows() : Promise<void> {
+
+    this.follows = [];
+    this.followers = [];
+
+    const did : string | null = this.userActionForm.get("userDID")?.value || null;
+    if (did) {
+      const response : ProfileView[] = await this.blueskyService.getFollows(did);
+      if (response.length) {
+        this.followers = response;
+      } else {
+        this.followers = [];
+      }
+    }
+  }
+
   async getFollowers() : Promise<void> {
 
+    this.follows = [];
+    this.followers = [];
+    
     const did : string | null = this.userActionForm.get("userDID")?.value || null;
     if (did) {
       const response : ProfileView[] = await this.blueskyService.getFollowers(did);
@@ -78,8 +100,6 @@ export class ReviewTabComponent {
       } else {
         this.followers = [];
       }
-      console.log(`Total followers: ${this.followers.length}`);
-      //console.log(`Followers: ${JSON.stringify(this.followers, null, 4)}`);
     }
   }
 
