@@ -25,10 +25,12 @@ export class BlueskyService {
    }
 
    async login() {
-    await this.agent.login({
-      identifier: process.env['BSKY_SERVICE_USER'] || '',
-      password: process.env['BSKY_SERVICE_PWD'] || ''
-    });
+
+
+
+    console.log(JSON.stringify(credentials));
+
+    await this.agent.login(credentials);
    }
 
    async logout() {
@@ -53,6 +55,7 @@ export class BlueskyService {
     do {
       const params = {
         actor: did,
+        limit: 100,
         cursor
       };
       const response = await this.agent.getFollows(params);
@@ -72,6 +75,7 @@ export class BlueskyService {
     do {
       const params = {
         actor: did,
+        limit: 100,
         cursor
       };
       const response = await this.agent.getFollowers(params);
