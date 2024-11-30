@@ -1,29 +1,39 @@
 <div style="margin: 10px 10px 10px 10px;">
 
-    <form [formGroup]="userSearchForm" (submit)="getId()">
-        <mat-form-field appearance="outline">
-            <mat-label>User URL</mat-label>
-            <input matInput formControlName="userUrl">
-        </mat-form-field>
-        <button type="submit" mat-raised-button color="primary" >Get ID</button>
+    <form [formGroup]="userForm">
+        <table>
+            <tr>
+                <td>
+                    <mat-form-field appearance="outline">
+                        <mat-label>User URL</mat-label>
+                        <input matInput formControlName="userUrl" (blur)="getId()">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <input type="hidden" formControlName="userDID">
+                    {{ this.userForm.get("userDID")?.value  || "Unknown"}}
+                </td>
+                <td>
+                    <button type="button" mat-raised-button color="primary" (click)="viewPage()">View Page</button>
+                    <button type="button" mat-raised-button color="primary" (click)="getFollows()">Follows</button>
+                    <button type="button" mat-raised-button color="primary" (click)="getFollowers()">Followers</button>
+                    <button type="button" mat-raised-button color="primary">Add to List</button>
+                </td>
+            </tr>
+        </table>
+
     </form>
-    <form [formGroup]="userActionForm">
+    <!-- <form [formGroup]="userActionForm">
+        <button type="submit" mat-raised-button color="primary" >Get ID</button>
         <mat-form-field appearance="outline">
             <input matInput [disabled]="true" formControlName="userDID">
         </mat-form-field>
-        <button type="button" mat-raised-button color="primary" (click)="viewPage()">View Page</button>
-        <button type="button" mat-raised-button color="primary" (click)="getFollows()">Follows</button>
-        <button type="button" mat-raised-button color="primary" (click)="getFollowers()">Followers</button>
-        <!-- <button type="button" mat-raised-button color="primary">Mark Reviewed</button> -->
-        <button type="button" mat-raised-button color="primary">Add to List</button>
-    </form>
-    
-    @if (followers.length) {
-        <p>
-            Followers: {{ followers.length }}
-        </p>
 
-        <table mat-table [dataSource]="followers">
+    </form> -->
+    
+    @if (followList.length) {
+
+        <table mat-table [dataSource]="followList">
             <ng-container matColumnDef="did">
                 <th mat-header-cell *matHeaderCellDef>DID</th>
                 <td mat-cell *matCellDef="let element"> {{element.did}} </td>
@@ -35,6 +45,10 @@
             <ng-container matColumnDef="displayName">
                 <th mat-header-cell *matHeaderCellDef>Display Name</th>
                 <td mat-cell *matCellDef="let element"> {{element.displayName}} </td>
+            </ng-container>
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let element"> {{element.description}} </td>
             </ng-container>
     
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

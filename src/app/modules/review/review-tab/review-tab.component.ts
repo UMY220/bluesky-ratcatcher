@@ -8,11 +8,13 @@ import { MatTableModule } from '@angular/material/table';
 import { ProfileView } from '@atproto/api/dist/client/types/app/bsky/actor/defs';
 
 import { BlueskyService } from '../../core/services/bluesky.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'bl-review-tab',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule, 
@@ -28,36 +30,45 @@ export class ReviewTabComponent {
   @Input()
   userUrl: string = "";
 
-  userSearchForm!: FormGroup;
-  userActionForm!: FormGroup;
+  userForm!: FormGroup;
+  // userSearchForm!: FormGroup;
+  // userActionForm!: FormGroup;
 
   actor: string = "Unknown";
 
   follows: ProfileView[] = [];
   followers: ProfileView[] = [];
 
-  displayedColumns: string[] = ['did', 'handle', 'displayName'];
+  followList:  ProfileView[] = [];
+
+  displayedColumns: string[] = ['did', 'handle', 'displayName', 'description'];
 
   constructor(private blueskyService: BlueskyService, private formBuilder: FormBuilder) {
 
-    this.userSearchForm = formBuilder.group({
-      userUrl: ['', [Validators.required]]
+    this.userForm = formBuilder.group({
+      userUrl: ['', [Validators.required]],
+      userDID: ['', [Validators.required]],
+      userHandle: ['', [Validators.required]],
     });
 
-    this.userActionForm = formBuilder.group({
-      userUrl: ['', [Validators.required]],
-      userHandle: ['', [Validators.required]],
-      userDID: ['', [Validators.required]],
-    });
+    // this.userSearchForm = formBuilder.group({
+    //   userUrl: ['', [Validators.required]]
+    // });
+
+    // this.userActionForm = formBuilder.group({
+    //   userUrl: ['', [Validators.required]],
+    //   userHandle: ['', [Validators.required]],
+    //   userDID: ['', [Validators.required]],
+    // });
     
   }
 
   async getId() {
 
-    console.log(`clicked getId(), form: ${JSON.stringify(this.userSearchForm.value)}`);
-    console.log(`user url: ${JSON.stringify(this.userSearchForm.get("userUrl")?.value || "unknown")}`);
+    console.log(`clicked getId(), form: ${JSON.stringify(this.userForm.value)}`);
+    console.log(`user url: ${JSON.stringify(this.userForm.get("userUrl")?.value || "unknown")}`);
 
-    const userUrl : string | null = this.userSearchForm.get("userUrl")?.value || null;
+    const userUrl : string | null = this.userForm.get("userUrl")?.value || null;
     if (userUrl) {
       console.log("Attempting to get user handle");
       const handleSubstring = userUrl.lastIndexOf("/") + 1;
@@ -66,46 +77,44 @@ export class ReviewTabComponent {
       this.actor = (await this.blueskyService.resolveHandle(handle)).data["did"];
       console.log(`DID: ${this.actor}`);
 
-      this.userActionForm.patchValue({ userUrl: userUrl, userHandle: handle, userDID: this.actor});
-      console.log(`User action form: ${JSON.stringify(this.userActionForm.value)}`);
+      this.userForm.patchValue({ userUrl: userUrl, userHandle: handle, userDID: this.actor});
+      console.log(`User action form: ${JSON.stringify(this.userForm.value)}`);
     }
   }
 
   async getFollows() : Promise<void> {
 
-    this.follows = [];
-    this.followers = [];
+    this.followList = [];
 
-    const did : string | null = this.userActionForm.get("userDID")?.value || null;
+    const did : string | null = this.userForm.get("userDID")?.value || null;
     if (did) {
       const response : ProfileView[] = await this.blueskyService.getFollows(did);
       if (response.length) {
-        this.followers = response;
+        this.followList = response;
       } else {
-        this.followers = [];
+        this.followList = [];
       }
     }
   }
 
   async getFollowers() : Promise<void> {
 
-    this.follows = [];
-    this.followers = [];
-    
-    const did : string | null = this.userActionForm.get("userDID")?.value || null;
+    this.followList = [];
+
+    const did : string | null = this.userForm.get("userDID")?.value || null;
     if (did) {
       const response : ProfileView[] = await this.blueskyService.getFollowers(did);
       if (response.length) {
-        this.followers = response;
+        this.followList = response;
       } else {
-        this.followers = [];
+        this.followList = [];
       }
     }
   }
 
   viewPage() {
     
-    const url : string | null = this.userActionForm.get("userUrl")?.value;
+    const url : string | null = this.userForm.get("userUrl")?.value;
     if (url) {
       window.open(url);
     }
