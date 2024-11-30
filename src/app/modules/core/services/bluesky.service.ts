@@ -27,7 +27,7 @@ export class BlueskyService {
    async login() {
     await this.agent.login({
       identifier: 'dartmanx.bsky.social',
-      password: 'lBwScfKg^Zk6'
+      password: ''
     });
    }
 
